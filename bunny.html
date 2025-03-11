@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Coding Bunny Animation</title>
+<style>
+  #bunnyCanvas {
+    border: 1px solid black;
+    background-color: #f0f0f0;
+  }
+</style>
+</head>
+<body>
+  <canvas id="bunnyCanvas" width="300" height="300"></canvas>
+
+  <script>
+    const canvas = document.getElementById('bunnyCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const bunny = {
+      x: 100,
+      y: 150,
+      size: 50,
+      earAngle: 0,
+      earSpeed: 0.05,
+      glassesOffset: 5, // Offset for glasses
+      codeLines: [],
+      codeLineSpeed: 2,
+      lastCodeLineTime: 0,
+    };
+
+    function drawBunny() {
+      // Body
+      ctx.beginPath();
+      ctx.ellipse(bunny.x, bunny.y, bunny.size / 2, bunny.size / 1.5, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      ctx.stroke();
+
+      // Ears
+      ctx.beginPath();
+      ctx.save();
+      ctx.translate(bunny.x - bunny.size / 4, bunny.y - bunny.size);
+      ctx.rotate(bunny.earAngle);
+      ctx.ellipse(0, 0, bunny.size / 4, bunny.size / 2, 0, 0, Math.PI);
+      ctx.fillStyle = 'lightgray';
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.save();
+      ctx.translate(bunny.x + bunny.size / 4, bunny.y - bunny.size);
+      ctx.rotate(-bunny.earAngle);
+      ctx.ellipse(0, 0, bunny.size / 4, bunny.size / 2, 0, 0, Math.PI);
+      ctx.fillStyle = 'lightgray';
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Face
+      ctx.beginPath();
+      ctx.ellipse(bunny.x, bunny.y - bunny.size / 4, bunny.size / 6, bunny.size / 8, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'pink';
+      ctx.fill();
+      ctx.stroke();
+
+      // Eyes (Glasses)
+      ctx.beginPath();
+      ctx.ellipse(bunny.x - bunny.size / 6 - bunny.glassesOffset, bunny.y - bunny.size / 3, bunny.size / 10, bunny.size / 10, 0, 0, Math.PI * 2);
+      ctx.ellipse(bunny.x + bunny.size / 6 + bunny.glassesOffset, bunny.y - bunny.size / 3, bunny.size / 10, bunny.size / 10, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.lineWidth = 1; //reset lineWidth
+    }
+
+    function drawCodeLines() {
+      for (let i = 0; i < bunny.codeLines.length; i++) {
+        const line = bunny.codeLines[i];
+        ctx.fillStyle = 'black';
+        ctx.fillText(line.text, line.x, line.y);
+      }
+    }
+
+    function generateCodeLine() {
+      const currentTime = Date.now();
+      if (currentTime - bunny.lastCodeLineTime > 500) { // Generate every 0.5 seconds
+        bunny.lastCodeLineTime = currentTime;
+        bunny.codeLines.push({
+          x: bunny.x + bunny.size / 2 + 10,
+          y: bunny.y - bunny.size / 2 + bunny.codeLines.length * 15,
+          text: getRandomCodeLine(),
+        });
+      }
+
+      for (let i = 0; i < bunny.codeLines.length; i++) {
+        bunny.codeLines[i].x += bunny.codeLineSpeed;
+        if (bunny.codeLines[i].x > canvas.width) {
+          bunny.codeLines.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    function getRandomCodeLine() {
+      const lines = [
+        'console.log("Hello World!");',
+        'let bunny = true;',
+        'for (let i = 0; i < 10; i++) {',
+        '  // ... code ...',
+        '  if(bunny){',
+        '    //more code',
+        '  }',
+        '  return 0;',
+        '}'
+      ];
+      return lines[Math.floor(Math.random() * lines.length)];
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      bunny.earAngle += bunny.earSpeed;
+      if (Math.abs(bunny.earAngle) > 0.3) {
+        bunny.earSpeed *= -1;
+      }
+
+      drawBunny();
+      generateCodeLine();
+      drawCodeLines();
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
